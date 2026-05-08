@@ -1,0 +1,68 @@
+#root {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  min-height: 100vh;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f7f6;
+  color: #333;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.App {
+  background-color: white;
+  width: 90%;
+  max-width: 800px; 
+  margin: 40px auto; 
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+}
+
+h1, h2, h3 {
+  color: #2c3e50;
+}
+
+h1 {
+  text-align: center;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 10px;
+}
+
+button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 10px 20px; 
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: #2980b9;
+}
+
+input[type="text"] {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 15px;
+  outline: none;
+  width: 200px; 
+}
+
+input[type="text"]:focus {
+  border-color: #3498db;
+}
+
+input[type="checkbox"] {
+  cursor: pointer;
+  transform: scale(1.3);
+}
