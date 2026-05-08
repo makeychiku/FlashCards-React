@@ -102,7 +102,15 @@ export default class App extends React.Component {
   handlePrev = () => {
     this.setState((prevState) => {
       const currentDeck = prevState.onlyUnlearned ? prevState.deck.filter(c => !c.isLearned) : prevState.deck;
-      const prevIndex = currentDeck.length > 0 ? (prevState.studyIndex - 1 + currentDeck.length) % currentDeck.length : 0;
+      let prevIndex = 0;
+
+      if (currentDeck.length > 0) {
+        if (prevState.studyIndex === 0) {
+          prevIndex = currentDeck.length - 1;
+        } else {
+          prevIndex = prevState.studyIndex - 1;
+        }
+      }
 
       return {
         studyIndex: prevIndex,
