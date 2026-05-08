@@ -8,7 +8,8 @@ export default class App extends React.Component {
     backText: "",
     studyIndex: 0,
     isFrontShowing: true,
-    onlyUnlearned: false
+    onlyUnlearned: false,
+    editingId: null
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -25,12 +26,20 @@ export default class App extends React.Component {
     this.setState({ backText: e.target.value });
   }
 
+  handleEditClick = (card) => () => {
+    this.setState({
+      frontText: card.front,
+      backText: card.back,
+      editingId: card.id
+    });
+  }
+
   handleAddCard = () => {
     const front = this.state.frontText.trim();
     const back = this.state.backText.trim();
 
     if (!front || !back) {
-      alert('You should fill in both inputs!')
+      alert('You should fill in both inputs!');
       return;
     }
 
@@ -39,13 +48,45 @@ export default class App extends React.Component {
       front: front,
       back: back,
       isLearned: false
-    }
+    };
 
     this.setState((prevState) => ({
       deck: [newCard, ...prevState.deck],
       frontText: "",
       backText: ""
-    }))
+    }));
+  }
+
+  handleSaveEdit = () => {
+    const front = this.state.frontText.trim();
+    const back = this.state.backText.trim();
+
+    if (!front || !back) {
+      alert('You should fill in both inputs!');
+      return;
+    }
+
+    this.setState((prevState) => {
+      let updatedDeck = prevState.deck.map((card) => {
+        if (card.id === prevState.editingId) {
+          return {
+            id: card.id,
+            front: front,
+            back: back,
+            isLearned: card.isLearned
+          };
+        } else {
+          return card;
+        }
+      });
+
+      return { 
+        deck: updatedDeck, 
+        frontText: "", 
+        backText: "", 
+        editingId: null 
+      };
+    });
   }
   
   handleDelCard = (id) => () => {
@@ -56,6 +97,20 @@ export default class App extends React.Component {
 
   handleFlip = () => {
     this.setState({ isFrontShowing: !this.state.isFrontShowing })
+  }
+
+  handlePrev = () => {
+    this.setState((prevState) => {
+      const currentDeck = prevState.onlyUnlearned ? prevState.deck.filter(c => !c.isLearned) : prevState.deck;
+      const prevIndex = currentDeck.length > 0 
+        ? (prevState.studyIndex - 1 + currentDeck.length) % currentDeck.length 
+        : 0;
+
+      return {
+        studyIndex: prevIndex,
+        isFrontShowing: true
+      }
+    })
   }
 
   handleNext = () => {
@@ -112,7 +167,7 @@ export default class App extends React.Component {
   }
 
   render() {
-    const { deck, studyIndex, isFrontShowing, onlyUnlearned } = this.state;
+    const { deck, studyIndex, isFrontShowing, onlyUnlearned, editingId } = this.state;
     const filteredDeck = onlyUnlearned ? deck.filter(card => !card.isLearned) : deck;
     const currentCard = filteredDeck[studyIndex] || {};
 
@@ -121,11 +176,14 @@ export default class App extends React.Component {
         <h1>FlashCards</h1>
 
         <div style={{ marginBottom: "20px", padding: "15px", border: "1px solid #b1afaf" }}>
-          <h3>Create Card</h3>
+          <h3>{editingId ? "Edit Card" : "Create Card"}</h3>
 
           <input type="text" placeholder="Front text/Question..." value={this.state.frontText} onChange={this.handleChangeFront}/>
           <input type="text" placeholder="Back text/Answer..." value={this.state.backText} onChange={this.handleChangeBack} style={{ marginLeft: "10px" }}/>
-          <button onClick={this.handleAddCard} style={{ marginLeft: "10px" }}>Add</button>
+          
+          <button onClick={editingId ? this.handleSaveEdit : this.handleAddCard} style={{ marginLeft: "10px" }}>
+            {editingId ? "Save" : "Add"}
+          </button>
         </div>
 
         <div style={{ marginBottom: "20px", padding: "20px", border: "2px solid #b1afaf", textAlign: "center" }}>
@@ -139,7 +197,8 @@ export default class App extends React.Component {
             {isFrontShowing ? (currentCard.front || "No Cards in the deck") : (currentCard.back || "No Cards in the deck")}
           </div>
 
-          <button onClick={this.handleNext} style={{ marginTop: "10px" }}>Next Card</button>
+          <button onClick={this.handlePrev} style={{ marginTop: "10px" }}>Prev Card</button>
+          <button onClick={this.handleNext} style={{ marginTop: "10px", marginLeft: "10px" }}>Next Card</button>
           <button onClick={this.handleShuffle} style={{ marginLeft: "10px" }}>Shuffle Deck</button>
         </div>
 
@@ -147,11 +206,13 @@ export default class App extends React.Component {
           <h2>Cards Collection: {deck.length}</h2>
 
           {deck.map((card) => (
-            <div key={card.id} style={{ borderBottom: "1px solid #b1afaf", padding: "10px" }}>
+            <div key={card.id} style={{ borderBottom: "1px solid #b1afaf", padding: "10px", display: "flex", alignItems: "center" }}>
               <input type="checkbox" checked={card.isLearned} onChange={this.handleToggleLearned(card.id)} style={{ marginRight: "10px" }}/>
-              <span style={{color: card.isLearned ? "#999" : "#000" }}>{card.front} — {card.back}</span>
+              
+              <span style={{color: card.isLearned ? "#999" : "#000", flexGrow: 1 }}>{card.front} — {card.back}</span>
 
-              <button onClick={this.handleDelCard(card.id)} style={{ marginLeft: "15px" }}>Del</button>
+              <button onClick={this.handleEditClick(card)} style={{ marginLeft: "15px" }}>Edit</button>
+              <button onClick={this.handleDelCard(card.id)} style={{ marginLeft: "10px" }}>Del</button>
             </div>
           ))}
         </div>
